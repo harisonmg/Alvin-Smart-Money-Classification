@@ -1,4 +1,4 @@
-name: tps
+name: alvin-smcc
 channels:
   - conda-forge
   - defaults
