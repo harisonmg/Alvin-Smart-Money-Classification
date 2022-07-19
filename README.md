@@ -1,7 +1,7 @@
-# Kaggle TPS
-Template for Kaggle
-[Tabular Playground Series competition](https://www.kaggle.com/competitions/?searchQuery=tabular+playground+series)
-solutions
+# Alvin Smart Money Classification
+Solution for the
+[Alvin Smart Money Classification](https://zindi.africa/competitions/alvin-smart-money-management-classification-challenge)
+challenge
 
 ## Requirements
 - Python 3.8 or greater
@@ -22,14 +22,12 @@ solutions
     pipenv shell
 
     # conda
-    conda activate tps
+    conda activate alvin-smcc
     ```
 1. Download the data and extract it in the `input` directory
     ```shell
-    kaggle competitions download -c [competition] -p input
-
-    # linux
-    unzip "input/*.zip" -d input
+    # extracting the data in linux
+    unzip "input/*.zip"
     ```
 
 1. Train a model
@@ -51,14 +49,8 @@ solutions
     python src/cli.py predict --run-id [run_id]
     ```
 
-1. Submit predictions to Kaggle
-    ```shell
-    kaggle competitions submit -c [competition] -f output/[file] -m "Message"
-    ```
-
 ## Notes
-- You need a Kaggle account to download the data. See the
-    [Kaggle API docs](https://www.kaggle.com/docs/api)
-    for more information on creating and storing API keys.
 - By default, there are 5 folds for cross validation, but that can
-    be changed with the `NUM_FOLDS` environment variable.
+    be changed with the `NUM_FOLDS` environment variable
+- Verbosity can be changed with the `VERBOSITY` environment variable
+- Environment variables can be set in the `.env` file
