@@ -83,7 +83,7 @@ VERBOSE = decouple.config("VERBOSE", cast=bool, default=False)
 VERBOSITY = decouple.config("VERBOSITY", cast=int, default=1)
 
 # project details
-PROJECT_NAME = "tps-template"
+PROJECT_NAME = "alvin-smcc"
 
 # mlflow config
 MLFLOW_TRACKING_URI = decouple.config(
