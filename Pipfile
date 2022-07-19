@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+python-decouple = "*"
+pandas = "*"
+scikit-learn = "*"
+xgboost = "*"
+catboost = "*"
+lightgbm = "*"
+jupyter = "*"
+kaggle = "*"
+seaborn = "*"
+pandas-profiling = {extras = ["jupyter"], version = "*"}
+mlflow = "*"
+optuna = "*"
+
+[dev-packages]
+black = {extras = ["jupyter"], version = "*"}
+flake8 = "*"
+isort = "*"
+
+[requires]
+python_version = "3.10"

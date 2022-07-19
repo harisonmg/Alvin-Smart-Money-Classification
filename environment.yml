@@ -1,0 +1,21 @@
+name: tps
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - python-decouple
+  - pandas
+  - scikit-learn
+  - xgboost
+  - catboost
+  - lightgbm
+  - jupyter
+  - kaggle
+  - seaborn
+  - pandas-profiling
+  - mlflow
+  - optuna
+  - black
+  - isort
+  - flake8
