@@ -21,6 +21,7 @@ class BaselineClassifier(BaseEstimator, ClassifierMixin):
 
     def fit(self, X, y):
         c = Counter(y)
+        self.classes_ = list(c.keys())
         self.mode_ = c.most_common(1)[0][0]
         self.target_freq_ = np.array(list(c.values())) / X.shape[0]
         return self
