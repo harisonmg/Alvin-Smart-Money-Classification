@@ -1,96 +1,53 @@
-from sklearn import compose, impute, pipeline, preprocessing
+import numpy as np
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer, OrdinalEncoder
 
-from . import config
-
-NUMERIC_DTYPES = ["int64", "float64"]
-
-
-def get_numeric_cols():
-    if config.CONTINUOUS_FEATURES:
-        return config.CONTINUOUS_FEATURES
-    return compose.make_column_selector(dtype_include=NUMERIC_DTYPES)
+UNTRANSFORMED_COLS = ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"]
 
 
-def get_categorical_cols():
-    if config.DISCRETE_FEATURES:
-        return config.DISCRETE_FEATURES
-    return compose.make_column_selector(dtype_exclude=NUMERIC_DTYPES)
+def featurize_ts(series: pd.Series) -> pd.DataFrame:
+    """Extract features from a timestamp column"""
+    df = pd.DataFrame()
+    col_prefix = series.name
+    df[f"{col_prefix}_month"] = series.dt.month
+    df[f"{col_prefix}_day"] = series.dt.day
+    df[f"{col_prefix}_weekday"] = series.dt.weekday
+    df[f"{col_prefix}_hour"] = series.dt.hour
+    return df
 
 
-imputers = {
-    "constant": impute.SimpleImputer(strategy="constant", fill_value="unknown"),
-    "knn": impute.KNNImputer(),
-    "mean": impute.SimpleImputer(),
-    "median": impute.SimpleImputer(strategy="median"),
-    "mode": impute.SimpleImputer(strategy="most_frequent"),
-}
+def log_transform(arr: np.ndarray) -> np.ndarray:
+    return np.expand_dims(np.log(arr), axis=1)
 
-encoders = {
-    "one_hot": preprocessing.OneHotEncoder(
-        handle_unknown="infrequent_if_exist", min_frequency=0.01
-    ),
-    "ordinal": preprocessing.OrdinalEncoder(
-        handle_unknown="use_encoded_value", unknown_value=-999
-    ),
-}
 
-scalers = {
-    "max_abs": preprocessing.MaxAbsScaler(),
-    "min_max": preprocessing.MinMaxScaler(),
-    "standard": preprocessing.StandardScaler(),
-}
+encoder_pipe = Pipeline(
+    [
+        (
+            "encode",
+            OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-999),
+        ),
+    ]
+)
+imputer_pipe = Pipeline(
+    [
+        ("expand_dims", FunctionTransformer(np.expand_dims, kw_args={"axis": 1})),
+        ("impute", SimpleImputer(strategy="constant", fill_value=-999)),
+    ]
+)
 
-numeric_pipelines = {
-    "linear": pipeline.Pipeline(
-        [("standard_scaler", scalers["standard"]), ("mean_imputer", imputers["mean"])],
-        verbose=config.VERBOSITY,
-    ),
-    "tree": pipeline.Pipeline(
-        [("mean_imputer", imputers["mean"])], verbose=config.VERBOSITY
-    ),
-}
-
-categorical_pipelines = {
-    "linear": pipeline.Pipeline(
-        [("one_hot_encoder", encoders["one_hot"])], verbose=config.VERBOSITY
-    ),
-    "tree": pipeline.Pipeline(
-        [("mode_imputer", imputers["mode"]), ("ordinal_encoder", encoders["ordinal"])],
-        verbose=config.VERBOSITY,
-    ),
-}
-
-preprocessors = {
-    "lin_num": compose.make_column_transformer(
-        (numeric_pipelines["linear"], get_numeric_cols()),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "tree_num": compose.make_column_transformer(
-        (numeric_pipelines["tree"], get_numeric_cols()),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "lin_cat": compose.make_column_transformer(
-        (categorical_pipelines["linear"], get_categorical_cols()),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "tree_cat": compose.make_column_transformer(
-        (categorical_pipelines["tree"], get_categorical_cols()),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "lin_all": compose.make_column_transformer(
-        (numeric_pipelines["linear"], get_numeric_cols()),
-        (categorical_pipelines["linear"], get_categorical_cols()),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "tree_all": compose.make_column_transformer(
-        (numeric_pipelines["tree"], get_numeric_cols()),
-        (categorical_pipelines["tree"], get_categorical_cols()),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-}
+preprocessor = ColumnTransformer(
+    [
+        ("merch_name_vec", CountVectorizer(stop_words="english"), "MERCHANT_NAME"),
+        ("purchased_ts", FunctionTransformer(featurize_ts), "PURCHASED_AT"),
+        ("identity", FunctionTransformer(lambda x: x * 1), UNTRANSFORMED_COLS),
+        ("log_purchase", FunctionTransformer(log_transform), "PURCHASE_VALUE"),
+        ("log_income", FunctionTransformer(log_transform), "USER_INCOME"),
+        ("encode", encoder_pipe, ["USER_ID", "USER_GENDER"]),
+        ("impute_age", imputer_pipe, "USER_AGE"),
+    ],
+    n_jobs=-1,
+)

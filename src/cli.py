@@ -2,7 +2,6 @@ import argparse
 
 from .models import models
 from .predict import predict
-from .preprocessors import preprocessors
 from .train import train
 
 
@@ -23,7 +22,7 @@ def main():
 
 def train_callback(args: argparse.Namespace):
     """Callback function for the train command"""
-    train(model=args.model, preprocessor=args.preprocessor, data_path=args.file)
+    train(model=args.model, data_path=args.file)
 
 
 def predict_callback(args: argparse.Namespace):
@@ -40,13 +39,6 @@ def parse_train(subparsers: argparse.ArgumentParser):
         type=str,
         required=True,
         choices=models.keys(),
-    )
-    parser_train.add_argument(
-        "-p",
-        "--preprocessor",
-        type=str,
-        required=True,
-        choices=preprocessors.keys(),
     )
     parser_train.add_argument(
         "-f", "--file", type=str, help="path to the file containing the data"
