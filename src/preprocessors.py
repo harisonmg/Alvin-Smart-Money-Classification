@@ -1,4 +1,3 @@
-import imp
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -34,14 +33,14 @@ encoder_pipe = Pipeline(
             OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-999),
         ),
     ],
-    verbose=config.VERBOSE
+    verbose=config.VERBOSE,
 )
 imputer_pipe = Pipeline(
     [
         ("expand_dims", FunctionTransformer(np.expand_dims, kw_args={"axis": 1})),
         ("impute", SimpleImputer(strategy="constant", fill_value=-999)),
     ],
-    verbose=config.VERBOSE
+    verbose=config.VERBOSE,
 )
 
 preprocessor = ColumnTransformer(
@@ -54,6 +53,7 @@ preprocessor = ColumnTransformer(
         ("encode", encoder_pipe, ["USER_ID", "USER_GENDER"]),
         ("impute_age", imputer_pipe, "USER_AGE"),
     ],
+    sparse_threshold=0,  # always return a dense array
     n_jobs=-1,
-    verbose=config.VERBOSE
+    verbose=config.VERBOSE,
 )
