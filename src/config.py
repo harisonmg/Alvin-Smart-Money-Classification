@@ -18,13 +18,11 @@ TRAIN_DATA = INPUT_DIR / "train.csv"
 TEST_DATA = INPUT_DIR / "test.csv"
 
 # columns in the data (for use in preprocessing pipeline)
-INDEX_COL = "id"
+INDEX_COL = "Transaction_ID"
 
-TARGET_COL = "target"
+TARGET_COL = "MERCHANT_CATEGORIZED_AS"
 
-CONTINUOUS_FEATURES = ()
-
-DISCRETE_FEATURES = ()
+DATETIME_COLS = ["MERCHANT_CATEGORIZED_AT", "PURCHASED_AT"]
 
 # random seed
 RANDOM_SEED = 98765
