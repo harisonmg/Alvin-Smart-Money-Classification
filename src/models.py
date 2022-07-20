@@ -4,7 +4,7 @@ import catboost
 import lightgbm
 import numpy as np
 import xgboost
-from sklearn import ensemble, linear_model, tree
+from sklearn import ensemble, tree
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 from .config import N_JOBS, RANDOM_SEED, VERBOSITY
@@ -35,7 +35,6 @@ class BaselineClassifier(BaseEstimator, ClassifierMixin):
 
 models = {
     "bc": BaselineClassifier(),
-    "lr": linear_model.LogisticRegression(random_state=RANDOM_SEED),
     "dt": tree.DecisionTreeClassifier(random_state=RANDOM_SEED),
     "rf": ensemble.RandomForestClassifier(
         n_jobs=N_JOBS, random_state=RANDOM_SEED, verbose=VERBOSITY
