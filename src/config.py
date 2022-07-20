@@ -35,7 +35,7 @@ CV_SPLITTER = model_selection.StratifiedKFold(
 )
 
 # metrics
-EVAL_METRICS = ("roc_auc",)
+EVAL_METRICS = ("neg_log_loss",)
 
 # parallel jobs
 N_JOBS = decouple.config("N_JOBS", cast=int, default=-1)
