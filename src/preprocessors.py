@@ -1,3 +1,4 @@
+import imp
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -5,6 +6,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OrdinalEncoder
+
+from . import config
 
 UNTRANSFORMED_COLS = ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"]
 
@@ -30,13 +33,15 @@ encoder_pipe = Pipeline(
             "encode",
             OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-999),
         ),
-    ]
+    ],
+    verbose=config.VERBOSE
 )
 imputer_pipe = Pipeline(
     [
         ("expand_dims", FunctionTransformer(np.expand_dims, kw_args={"axis": 1})),
         ("impute", SimpleImputer(strategy="constant", fill_value=-999)),
-    ]
+    ],
+    verbose=config.VERBOSE
 )
 
 preprocessor = ColumnTransformer(
@@ -50,4 +55,5 @@ preprocessor = ColumnTransformer(
         ("impute_age", imputer_pipe, "USER_AGE"),
     ],
     n_jobs=-1,
+    verbose=config.VERBOSE
 )
