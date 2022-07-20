@@ -27,7 +27,9 @@ def predict(run_id: str, data_path="", proba=False, save_preds=True) -> None:
     else:
         data_path = Path(data_path)
 
-    test_df = pd.read_csv(data_path, index_col=config.INDEX_COL)
+    test_df = pd.read_csv(
+        data_path, index_col=config.INDEX_COL, parse_dates=config.DATETIME_COLS
+    )
 
     # get the number of folds for this run
     n_folds = int(mlflow.get_run(run_id).data.tags["n_folds"])

@@ -56,7 +56,9 @@ def train(model: str, data_path="") -> None:
     if not data_path:
         data_path = config.TRAIN_DATA
 
-    train_df = pd.read_csv(data_path, index_col=config.INDEX_COL)
+    train_df = pd.read_csv(
+        data_path, index_col=config.INDEX_COL, parse_dates=config.DATETIME_COLS
+    )
 
     # separate features from target
     X = train_df.drop(config.TARGET_COL, axis=1)
