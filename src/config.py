@@ -27,7 +27,7 @@ DATETIME_COLS = ["MERCHANT_CATEGORIZED_AT", "PURCHASED_AT"]
 RANDOM_SEED = 98765
 
 # cross validation
-NUM_FOLDS = decouple.config("NUM_FOLDS", cast=int, default=5)
+NUM_FOLDS = decouple.config("NUM_FOLDS", cast=int, default=3)
 
 CV_SPLITTER = model_selection.StratifiedKFold(
     n_splits=NUM_FOLDS, shuffle=True, random_state=RANDOM_SEED
