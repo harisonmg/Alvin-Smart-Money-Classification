@@ -2,7 +2,6 @@ from logging.config import dictConfig
 from pathlib import Path
 
 import decouple
-import mlflow
 from sklearn import model_selection
 
 # file paths
@@ -87,9 +86,3 @@ PROJECT_NAME = "alvin-smcc"
 MLFLOW_TRACKING_URI = decouple.config(
     "MLFLOW_TRACKING_URI", default=f"sqlite:///{OUTPUT_DIR}/mlruns.db"
 )
-
-mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-
-MLFLOW_EXPERIMENT = mlflow.set_experiment(PROJECT_NAME)
-
-MLFLOW_EXPERIMENT_ID = MLFLOW_EXPERIMENT.experiment_id

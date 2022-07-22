@@ -3,8 +3,10 @@ import argparse
 from .models import models
 from .predict import predict
 from .train import train
+from .utils import configure_mlflow
 
 
+@configure_mlflow
 def main():
     """Main function for the CLI"""
     # create the main parser
