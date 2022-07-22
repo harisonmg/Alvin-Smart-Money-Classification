@@ -42,3 +42,20 @@ def configure_mlflow(
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def load_model(run_id, model_name="model"):
+    """Load a scikit-learn model from a given run ID and model name"""
+    return mlflow.sklearn.load_model(f"runs:/{run_id}/{model_name}")
+
+
+def load_models(run_id: str) -> list:
+    """Load all models from a given run ID"""
+    # get the number of folds for this run
+    n_folds = int(mlflow.get_run(run_id).data.tags["n_folds"])
+
+    # load models
+    models = []
+    for fold in range(n_folds):
+        models.append(load_model(run_id, f"model_{fold}"))
+    return models

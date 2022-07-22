@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import mlflow
 import pandas as pd
 
 from . import config, utils
@@ -31,15 +30,12 @@ def predict(run_id: str, data_path="", proba=False, save_preds=True) -> None:
         data_path, index_col=config.INDEX_COL, parse_dates=config.DATETIME_COLS
     )
 
-    # get the number of folds for this run
-    n_folds = int(mlflow.get_run(run_id).data.tags["n_folds"])
+    # load models
+    estimators = utils.load_models(run_id)
 
     # obtain predictions
     predictions = None
-    for fold in range(n_folds):
-        # load model
-        logged_model = f"runs:/{run_id}/model_{fold}"
-        estimator = mlflow.sklearn.load_model(logged_model)
+    for estimator in estimators:
         test_preds = estimator.predict_proba(test_df)
 
         if predictions is None:
@@ -48,7 +44,7 @@ def predict(run_id: str, data_path="", proba=False, save_preds=True) -> None:
             predictions += test_preds
 
     # average predictions and create a dataframe
-    predictions /= n_folds
+    predictions /= len(estimators)
     predictions_df = pd.DataFrame(
         predictions, columns=estimator.classes_, index=test_df.index
     )
