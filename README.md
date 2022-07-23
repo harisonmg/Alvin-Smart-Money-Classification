@@ -36,7 +36,7 @@ challenge
     python src/cli.py train --help
 
     # train a model
-    python src/cli.py train --model [model]
+    python src/cli.py train --model [model] --preprocessor [preprocessor]
     ```
 
 1. Make predictions on test data using the trained model. Predictions are saved

@@ -1,59 +1,132 @@
-import numpy as np
-import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import FunctionTransformer, OrdinalEncoder
+from feature_engine.datetime import DatetimeFeatures
+from feature_engine.transformation import LogTransformer
+from sklearn import compose, impute, pipeline, preprocessing
+from sklearn.feature_extraction import text
+from sklego.preprocessing import IdentityTransformer
 
 from . import config
 
-UNTRANSFORMED_COLS = ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"]
+DATETIME_FEATURES = ["month", "day_of_month", "day_of_week", "hour"]
+
+imputers = {
+    "constant": impute.SimpleImputer(strategy="constant", fill_value="unknown"),
+    "knn": impute.KNNImputer(),
+    "mean": impute.SimpleImputer(),
+    "median": impute.SimpleImputer(strategy="median"),
+    "mode": impute.SimpleImputer(strategy="most_frequent"),
+}
+
+encoders = {
+    "one_hot": preprocessing.OneHotEncoder(
+        handle_unknown="infrequent_if_exist", min_frequency=0.01
+    ),
+    "ordinal": preprocessing.OrdinalEncoder(
+        handle_unknown="use_encoded_value", unknown_value=-999
+    ),
+}
+
+vectorizers = {
+    "count": text.CountVectorizer(stop_words="english"),
+    "tfidf": text.TfidfVectorizer(stop_words="english"),
+}
 
 
-def featurize_ts(series: pd.Series) -> pd.DataFrame:
-    """Extract features from a timestamp column"""
-    df = pd.DataFrame()
-    col_prefix = series.name
-    df[f"{col_prefix}_month"] = series.dt.month
-    df[f"{col_prefix}_day"] = series.dt.day
-    df[f"{col_prefix}_weekday"] = series.dt.weekday
-    df[f"{col_prefix}_hour"] = series.dt.hour
-    return df
+gender_pipe = pipeline.Pipeline(
+    [("encoder", encoders["ordinal"]), ("imputer", imputers["mode"])]
+)
 
 
-def log_transform(arr: np.ndarray) -> np.ndarray:
-    return np.expand_dims(np.log(arr), axis=1)
-
-
-encoder_pipe = Pipeline(
-    [
+preprocessors = {
+    "custom_1": compose.make_column_transformer(
+        (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
+        (gender_pipe, ["USER_GENDER"]),
         (
-            "encode",
-            OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-999),
+            IdentityTransformer(),
+            ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"],
         ),
-    ],
-    verbose=config.VERBOSE,
-)
-imputer_pipe = Pipeline(
-    [
-        ("expand_dims", FunctionTransformer(np.expand_dims, kw_args={"axis": 1})),
-        ("impute", SimpleImputer(strategy="constant", fill_value=-999)),
-    ],
-    verbose=config.VERBOSE,
-)
-
-preprocessor = ColumnTransformer(
-    [
-        ("merch_name_vec", CountVectorizer(stop_words="english"), "MERCHANT_NAME"),
-        ("purchased_ts", FunctionTransformer(featurize_ts), "PURCHASED_AT"),
-        ("identity", FunctionTransformer(lambda x: x * 1), UNTRANSFORMED_COLS),
-        ("log_purchase", FunctionTransformer(log_transform), "PURCHASE_VALUE"),
-        ("log_income", FunctionTransformer(log_transform), "USER_INCOME"),
-        ("encode", encoder_pipe, ["USER_ID", "USER_GENDER"]),
-        ("impute_age", imputer_pipe, "USER_AGE"),
-    ],
-    sparse_threshold=0,  # always return a dense array
-    n_jobs=-1,
-    verbose=config.VERBOSE,
-)
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    # add discretized income and purchase value to `custom_1`
+    "custom_2": compose.make_column_transformer(
+        (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
+        (gender_pipe, ["USER_GENDER"]),
+        (
+            IdentityTransformer(),
+            ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"],
+        ),
+        (
+            preprocessing.KBinsDiscretizer(encode="ordinal"),
+            ["PURCHASE_VALUE", "USER_INCOME"],
+        ),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    # add discretized purchase value and log transformed income to `custom_1`
+    "custom_3": compose.make_column_transformer(
+        (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
+        (gender_pipe, ["USER_GENDER"]),
+        (
+            IdentityTransformer(),
+            ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"],
+        ),
+        (preprocessing.KBinsDiscretizer(encode="ordinal"), ["PURCHASE_VALUE"]),
+        (LogTransformer(), ["USER_INCOME"]),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    # add ordinal encoded merchant name and user id to `custom_1`
+    "custom_4": compose.make_column_transformer(
+        (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
+        (gender_pipe, ["USER_GENDER"]),
+        (
+            IdentityTransformer(),
+            ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"],
+        ),
+        (encoders["ordinal"], ["MERCHANT_NAME", "USER_ID"]),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    # add ordinal encoded merchant name and user id to `custom_2`
+    "custom_5": compose.make_column_transformer(
+        (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
+        (gender_pipe, ["USER_GENDER"]),
+        (
+            IdentityTransformer(),
+            ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"],
+        ),
+        (
+            preprocessing.KBinsDiscretizer(encode="ordinal"),
+            ["PURCHASE_VALUE", "USER_INCOME"],
+        ),
+        (encoders["ordinal"], ["MERCHANT_NAME", "USER_ID"]),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    # add ordinal encoded merchant name and user id to `custom_3`
+    "custom_6": compose.make_column_transformer(
+        (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
+        (gender_pipe, ["USER_GENDER"]),
+        (
+            IdentityTransformer(),
+            ["IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY", "USER_HOUSEHOLD"],
+        ),
+        (preprocessing.KBinsDiscretizer(encode="ordinal"), ["PURCHASE_VALUE"]),
+        (LogTransformer(), ["USER_INCOME"]),
+        (encoders["ordinal"], ["MERCHANT_NAME", "USER_ID"]),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    "name_count": compose.make_column_transformer(
+        (vectorizers["count"], "MERCHANT_NAME"),
+        sparse_threshold=0,
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    "name_tfidf": compose.make_column_transformer(
+        (vectorizers["tfidf"], "MERCHANT_NAME"),
+        sparse_threshold=0,
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+}

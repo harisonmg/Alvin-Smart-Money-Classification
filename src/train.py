@@ -3,10 +3,9 @@ import logging
 import mlflow
 import pandas as pd
 from sklearn.model_selection import cross_validate
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import Pipeline
 
-from . import config, models, utils
-from .preprocessors import preprocessor
+from . import config, models, preprocessors, utils
 
 # logger
 logger = logging.getLogger(__name__)
@@ -50,7 +49,7 @@ def save_models(models: list) -> None:
 
 
 @utils.timer
-def train(model: str, data_path="") -> None:
+def train(model: str, preprocessor: str, data_path="") -> None:
     """Train model."""
     # load data
     if not data_path:
@@ -65,16 +64,17 @@ def train(model: str, data_path="") -> None:
     y = train_df[config.TARGET_COL]
 
     # create pipeline
-    pipe = make_pipeline(
-        preprocessor,
-        models.models[model],
+    pipe = Pipeline(
+        [
+            (preprocessor, preprocessors.preprocessors[preprocessor]),
+            (model, models.models[model]),
+        ],
         verbose=config.VERBOSE,
     )
 
-    tags = {"model": model, "n_folds": config.NUM_FOLDS}
+    tags = {"model": model, "preprocessor": preprocessor, "n_folds": config.NUM_FOLDS}
     with mlflow.start_run(
-        experiment_id=config.MLFLOW_EXPERIMENT_ID,
-        run_name=f"{model}, {config.NUM_FOLDS} folds",
+        run_name=f"{model}+{preprocessor}+{config.NUM_FOLDS}",
         tags=tags,
     ):
         # log model parameters
