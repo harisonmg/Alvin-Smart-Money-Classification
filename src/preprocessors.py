@@ -1,6 +1,6 @@
 from feature_engine.datetime import DatetimeFeatures
 from feature_engine.transformation import LogTransformer
-from sklearn import compose, impute, pipeline, preprocessing
+from sklearn import compose, decomposition, impute, pipeline, preprocessing
 from sklearn.feature_extraction import text
 from sklego.preprocessing import IdentityTransformer
 
@@ -25,6 +25,11 @@ encoders = {
     ),
 }
 
+decomposers = {
+    "nmf": decomposition.NMF(),
+    "truncated_svd": decomposition.TruncatedSVD(),
+}
+
 vectorizers = {
     "count": text.CountVectorizer(stop_words="english"),
     "tfidf": text.TfidfVectorizer(stop_words="english"),
@@ -32,8 +37,40 @@ vectorizers = {
 
 
 gender_pipe = pipeline.Pipeline(
-    [("encoder", encoders["ordinal"]), ("imputer", imputers["mode"])]
+    [("encoder", encoders["ordinal"]), ("imputer", imputers["mode"])],
+    verbose=config.VERBOSITY,
 )
+
+merchant_name_pipelines = {
+    "count_nmf": pipeline.Pipeline(
+        [
+            ("vectorizer", vectorizers["count"]),
+            ("decomposer", decomposers["nmf"]),
+        ],
+        verbose=config.VERBOSITY,
+    ),
+    "count_truncated_svd": pipeline.Pipeline(
+        [
+            ("vectorizer", vectorizers["count"]),
+            ("decomposer", decomposers["truncated_svd"]),
+        ],
+        verbose=config.VERBOSITY,
+    ),
+    "tfidf_nmf": pipeline.Pipeline(
+        [
+            ("vectorizer", vectorizers["tfidf"]),
+            ("decomposer", decomposers["nmf"]),
+        ],
+        verbose=config.VERBOSITY,
+    ),
+    "tfidf_truncated_svd": pipeline.Pipeline(
+        [
+            ("vectorizer", vectorizers["tfidf"]),
+            ("decomposer", decomposers["truncated_svd"]),
+        ],
+        verbose=config.VERBOSITY,
+    ),
+}
 
 
 preprocessors = {
@@ -117,15 +154,35 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_count": compose.make_column_transformer(
+    "name_1": compose.make_column_transformer(
         (vectorizers["count"], "MERCHANT_NAME"),
         sparse_threshold=0,
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_tfidf": compose.make_column_transformer(
+    "name_2": compose.make_column_transformer(
         (vectorizers["tfidf"], "MERCHANT_NAME"),
         sparse_threshold=0,
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    "name_3": compose.make_column_transformer(
+        (merchant_name_pipelines["count_nmf"], "MERCHANT_NAME"),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    "name_4": compose.make_column_transformer(
+        (merchant_name_pipelines["count_truncated_svd"], "MERCHANT_NAME"),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    "name_5": compose.make_column_transformer(
+        (merchant_name_pipelines["tfidf_nmf"], "MERCHANT_NAME"),
+        n_jobs=config.N_JOBS,
+        verbose=config.VERBOSE,
+    ),
+    "name_6": compose.make_column_transformer(
+        (merchant_name_pipelines["tfidf_truncated_svd"], "MERCHANT_NAME"),
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
