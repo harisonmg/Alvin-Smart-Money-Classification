@@ -41,7 +41,7 @@ gender_pipe = pipeline.Pipeline(
     verbose=config.VERBOSITY,
 )
 
-merchant_name_pipelines = {
+text_pipelines = {
     "count_nmf": pipeline.Pipeline(
         [
             ("vectorizer", vectorizers["count"]),
@@ -74,7 +74,7 @@ merchant_name_pipelines = {
 
 
 preprocessors = {
-    "custom_1": compose.make_column_transformer(
+    "c1": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
         (gender_pipe, ["USER_GENDER"]),
         (
@@ -84,8 +84,8 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    # add discretized income and purchase value to `custom_1`
-    "custom_2": compose.make_column_transformer(
+    # add discretized income and purchase value to `c1`
+    "c2": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
         (gender_pipe, ["USER_GENDER"]),
         (
@@ -99,8 +99,8 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    # add discretized purchase value and log transformed income to `custom_1`
-    "custom_3": compose.make_column_transformer(
+    # add discretized purchase value and log transformed income to `c1`
+    "c3": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
         (gender_pipe, ["USER_GENDER"]),
         (
@@ -112,8 +112,8 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    # add ordinal encoded merchant name and user id to `custom_1`
-    "custom_4": compose.make_column_transformer(
+    # add ordinal encoded merchant name and user id to `c1`
+    "c4": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
         (gender_pipe, ["USER_GENDER"]),
         (
@@ -124,8 +124,8 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    # add ordinal encoded merchant name and user id to `custom_2`
-    "custom_5": compose.make_column_transformer(
+    # add ordinal encoded merchant name and user id to `c2`
+    "c5": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
         (gender_pipe, ["USER_GENDER"]),
         (
@@ -140,8 +140,8 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    # add ordinal encoded merchant name and user id to `custom_3`
-    "custom_6": compose.make_column_transformer(
+    # add ordinal encoded merchant name and user id to `c3`
+    "c6": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
         (gender_pipe, ["USER_GENDER"]),
         (
@@ -154,35 +154,35 @@ preprocessors = {
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_1": compose.make_column_transformer(
+    "n1": compose.make_column_transformer(
         (vectorizers["count"], "MERCHANT_NAME"),
         sparse_threshold=0,
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_2": compose.make_column_transformer(
+    "n2": compose.make_column_transformer(
         (vectorizers["tfidf"], "MERCHANT_NAME"),
         sparse_threshold=0,
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_3": compose.make_column_transformer(
-        (merchant_name_pipelines["count_nmf"], "MERCHANT_NAME"),
+    "n3": compose.make_column_transformer(
+        (text_pipelines["count_nmf"], "MERCHANT_NAME"),
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_4": compose.make_column_transformer(
-        (merchant_name_pipelines["count_truncated_svd"], "MERCHANT_NAME"),
+    "n4": compose.make_column_transformer(
+        (text_pipelines["count_truncated_svd"], "MERCHANT_NAME"),
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_5": compose.make_column_transformer(
-        (merchant_name_pipelines["tfidf_nmf"], "MERCHANT_NAME"),
+    "n5": compose.make_column_transformer(
+        (text_pipelines["tfidf_nmf"], "MERCHANT_NAME"),
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
-    "name_6": compose.make_column_transformer(
-        (merchant_name_pipelines["tfidf_truncated_svd"], "MERCHANT_NAME"),
+    "n6": compose.make_column_transformer(
+        (text_pipelines["tfidf_truncated_svd"], "MERCHANT_NAME"),
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
