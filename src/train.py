@@ -91,6 +91,7 @@ def train(model: str, preprocessor: str, data_path="") -> None:
             n_jobs=config.N_JOBS,
             verbose=config.VERBOSITY,
             return_estimator=True,
+            return_train_score=True,
         )
 
         # summarize CV results
