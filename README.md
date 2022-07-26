@@ -1,5 +1,5 @@
 # Alvin Smart Money Classification
-Solution for the
+My solution for the
 [Alvin Smart Money Classification](https://zindi.africa/competitions/alvin-smart-money-management-classification-challenge)
 challenge
 
