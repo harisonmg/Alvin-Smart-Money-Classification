@@ -1,24 +1,20 @@
 # Best result so far
 ## Model
-- Name: [model]
-- Class: [class]
-
-### Hyperparameters
-Default
+CatBoost with default parameters
 
 ## Preprocessing
-Pipeline name: [preprocessor]
+The default preprocessing pipeline in version `0.1.0`.
 
 ### Actions
-- Continuous features:
-    - Standardize
-    - Impute missing values with mean
-- Categorical features:
-    - One-hot encode
-    - Impute missing values with mode
+- Count vectorize merchant name
+- Obtain day, day of week, month and hour of day from purchase timestamp
+- Log transform purchase amount and user income
+- Ordinal encode user ID and gender
+- Impute missing age with a constant
+- Select household size and `IS_PURCHASE_PAID_VIA_MPESA_SEND_MONEY`
 
 ## Score
-- Metric: [evaluation_metric]
-- Cross validation score: 0 (std: 0)
-- Public leaderboard score: 0 (rank: 0/0)
-- Private leaderboard score: 0 (rank: 0/0)
+- Metric: Log loss
+- Cross validation score: 1.54217 (std: NaN)
+- Public leaderboard score: 1.468897 (rank: 50/221)
+- Private leaderboard score: 1.584807 (rank: 48/221)
