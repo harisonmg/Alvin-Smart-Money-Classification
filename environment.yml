@@ -16,6 +16,11 @@ dependencies:
   - pandas-profiling
   - mlflow
   - optuna
+  - eli5
+  - shap
+  - scikit-lego
   - black
   - isort
   - flake8
+  - pip:
+    - feature-engine

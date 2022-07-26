@@ -16,6 +16,10 @@ seaborn = "*"
 pandas-profiling = {extras = ["jupyter"], version = "*"}
 mlflow = "*"
 optuna = "*"
+eli5 = "*"
+shap = "*"
+feature-engine = "*"
+scikit-lego = "*"
 
 [dev-packages]
 black = {extras = ["jupyter"], version = "*"}
