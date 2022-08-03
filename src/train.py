@@ -43,7 +43,7 @@ def log_metrics(metrics: dict) -> None:
 
 @utils.timer
 def save_models(models: list) -> None:
-    """Save models as mlflow artifacts."""
+    """Save models as MLflow artifacts."""
     for fold, model in enumerate(models):
         mlflow.sklearn.log_model(model, f"model_{fold}")
 

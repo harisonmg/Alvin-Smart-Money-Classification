@@ -140,7 +140,7 @@ output/
 # catboost logs
 catboost_info/
 
-# mlflow artifacts
+# MLflow artifacts
 mlruns/
 
 # sqlite databases

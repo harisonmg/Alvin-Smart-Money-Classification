@@ -86,7 +86,7 @@ VERBOSITY = decouple.config("VERBOSITY", cast=int, default=1)
 # project details
 PROJECT_NAME = "alvin-smcc"
 
-# mlflow config
+# MLflow config
 MLFLOW_TRACKING_URI = decouple.config(
     "MLFLOW_TRACKING_URI", default=f"sqlite:///{OUTPUT_DIR}/mlruns.db"
 )
