@@ -16,12 +16,15 @@ TRAIN_DATA = INPUT_DIR / "train.csv"
 
 TEST_DATA = INPUT_DIR / "test.csv"
 
-# columns in the data (for use in preprocessing pipeline)
+# columns in the data
 INDEX_COL = "Transaction_ID"
 
 TARGET_COL = "MERCHANT_CATEGORIZED_AS"
 
 DATETIME_COLS = ["MERCHANT_CATEGORIZED_AT", "PURCHASED_AT"]
+
+# project details
+PROJECT_NAME = "alvin-smcc"
 
 # random seed
 RANDOM_SEED = 98765
@@ -83,15 +86,12 @@ VERBOSITY = decouple.config("VERBOSITY", cast=int, default=1)
 
 VERBOSE = VERBOSITY > 1
 
-# project details
-PROJECT_NAME = "alvin-smcc"
-
-# MLflow config
+# MLflow
 MLFLOW_TRACKING_URI = decouple.config(
     "MLFLOW_TRACKING_URI", default=f"sqlite:///{OUTPUT_DIR}/mlruns.db"
 )
 
-# optuna config
+# optuna
 OPTUNA_DATABASE_URL = decouple.config(
     "OPTUNA_DATABASE_URL", default=f"sqlite:///{OUTPUT_DIR}/optuna.db"
 )
