@@ -69,7 +69,11 @@ LOGGING = {
                 "file",
             ],
             "level": "INFO",
-        }
+        },
+        "optuna": {
+            "handlers": ["file"],
+            "level": "INFO",
+        },
     },
 }
 
@@ -85,4 +89,9 @@ PROJECT_NAME = "alvin-smcc"
 # mlflow config
 MLFLOW_TRACKING_URI = decouple.config(
     "MLFLOW_TRACKING_URI", default=f"sqlite:///{OUTPUT_DIR}/mlruns.db"
+)
+
+# optuna config
+OPTUNA_DATABASE_URL = decouple.config(
+    "OPTUNA_DATABASE_URL", default=f"sqlite:///{OUTPUT_DIR}/optuna.db"
 )
