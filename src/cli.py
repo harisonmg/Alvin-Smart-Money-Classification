@@ -1,9 +1,11 @@
 import argparse
 
 from .models import models
+from .params import param_distributions
 from .predict import predict
 from .preprocessors import preprocessors
 from .train import train
+from .tune import samplers, tune
 from .utils import configure_mlflow
 
 
@@ -17,6 +19,7 @@ def main():
     # create a subparser for each subcommand
     parse_train(subparsers)
     parse_predict(subparsers)
+    parse_tune(subparsers)
 
     # parse the arguments from the command line and call the callback function
     args = parser.parse_args()
@@ -26,6 +29,18 @@ def main():
 def train_callback(args: argparse.Namespace):
     """Callback function for the train command"""
     train(model=args.model, preprocessor=args.preprocessor, data_path=args.file)
+
+
+def tune_callback(args: argparse.Namespace):
+    """Callback function for the tune command"""
+    tune(
+        model=args.model,
+        preprocessor=args.preprocessor,
+        data_path=args.file,
+        n_trials=args.trials,
+        timeout=args.timeout,
+        sampler=args.sampler,
+    )
 
 
 def predict_callback(args: argparse.Namespace):
@@ -56,6 +71,47 @@ def parse_train(subparsers: argparse.ArgumentParser):
 
     # add the callback for the train command
     parser_train.set_defaults(func=train_callback)
+
+
+def parse_tune(subparsers: argparse.ArgumentParser):
+    """Subparser for the tune command"""
+    parser_tune = subparsers.add_parser("tune", help="tune a model's hyperparameters")
+    parser_tune.add_argument(
+        "-m",
+        "--model",
+        type=str,
+        required=True,
+        choices=param_distributions.keys(),
+    )
+    parser_tune.add_argument(
+        "-p",
+        "--preprocessor",
+        type=str,
+        required=True,
+        choices=preprocessors.keys(),
+    )
+    parser_tune.add_argument(
+        "-f", "--file", type=str, help="path to the file containing the data"
+    )
+    parser_tune.add_argument(
+        "--trials", type=int, default=5, help="number of trials to run"
+    )
+    parser_tune.add_argument(
+        "--timeout",
+        type=float,
+        default=10,
+        help="maximum number of minutes to tune the model",
+    )
+    parser_tune.add_argument(
+        "--sampler",
+        type=str,
+        default="random",
+        choices=samplers.keys(),
+        help="sampler to use",
+    )
+
+    # add the callback for the tune command
+    parser_tune.set_defaults(func=tune_callback)
 
 
 def parse_predict(subparsers: argparse.ArgumentParser):
