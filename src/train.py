@@ -27,6 +27,7 @@ def summarize_metrics(metrics: dict) -> pd.DataFrame:
     return summary.loc[["mean", "std"]]
 
 
+@utils.timer
 def log_metrics(metrics: dict) -> None:
     """Log cross-validation metrics."""
     summary = summarize_metrics(metrics)
@@ -36,9 +37,8 @@ def log_metrics(metrics: dict) -> None:
     logger.info(f"Cross validation results\nfor run {run_id!r}:\n{summary.T}")
 
     # log metrics to MLflow
-    for metric, values in summary.iteritems():
-        mlflow.log_metric(f"{metric}_mean", values["mean"])
-        mlflow.log_metric(f"{metric}_std", values["std"])
+    flat_summary = pd.json_normalize(summary.to_dict())
+    mlflow.log_metrics(flat_summary.loc[0].to_dict())
 
 
 @utils.timer
@@ -93,8 +93,6 @@ def train(model: str, preprocessor: str, data_path="") -> None:
             return_estimator=True,
             return_train_score=True,
         )
-
-        # summarize CV results
         estimators = cv_results.pop("estimator")
 
         # log metrics
