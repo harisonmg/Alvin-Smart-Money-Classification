@@ -79,9 +79,9 @@ LOGGING = {
 
 dictConfig(LOGGING)
 
-VERBOSE = decouple.config("VERBOSE", cast=bool, default=False)
-
 VERBOSITY = decouple.config("VERBOSITY", cast=int, default=1)
+
+VERBOSE = VERBOSITY > 1
 
 # project details
 PROJECT_NAME = "alvin-smcc"
