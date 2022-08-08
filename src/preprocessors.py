@@ -41,38 +41,6 @@ gender_pipe = pipeline.Pipeline(
     verbose=config.VERBOSITY,
 )
 
-text_pipelines = {
-    "count_nmf": pipeline.Pipeline(
-        [
-            ("vectorizer", vectorizers["count"]),
-            ("decomposer", decomposers["nmf"]),
-        ],
-        verbose=config.VERBOSITY,
-    ),
-    "count_truncated_svd": pipeline.Pipeline(
-        [
-            ("vectorizer", vectorizers["count"]),
-            ("decomposer", decomposers["truncated_svd"]),
-        ],
-        verbose=config.VERBOSITY,
-    ),
-    "tfidf_nmf": pipeline.Pipeline(
-        [
-            ("vectorizer", vectorizers["tfidf"]),
-            ("decomposer", decomposers["nmf"]),
-        ],
-        verbose=config.VERBOSITY,
-    ),
-    "tfidf_truncated_svd": pipeline.Pipeline(
-        [
-            ("vectorizer", vectorizers["tfidf"]),
-            ("decomposer", decomposers["truncated_svd"]),
-        ],
-        verbose=config.VERBOSITY,
-    ),
-}
-
-
 preprocessors = {
     "c1": compose.make_column_transformer(
         (DatetimeFeatures(features_to_extract=DATETIME_FEATURES), ["PURCHASED_AT"]),
@@ -157,32 +125,6 @@ preprocessors = {
     "n1": compose.make_column_transformer(
         (vectorizers["count"], "MERCHANT_NAME"),
         sparse_threshold=0,
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "n2": compose.make_column_transformer(
-        (vectorizers["tfidf"], "MERCHANT_NAME"),
-        sparse_threshold=0,
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "n3": compose.make_column_transformer(
-        (text_pipelines["count_nmf"], "MERCHANT_NAME"),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "n4": compose.make_column_transformer(
-        (text_pipelines["count_truncated_svd"], "MERCHANT_NAME"),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "n5": compose.make_column_transformer(
-        (text_pipelines["tfidf_nmf"], "MERCHANT_NAME"),
-        n_jobs=config.N_JOBS,
-        verbose=config.VERBOSE,
-    ),
-    "n6": compose.make_column_transformer(
-        (text_pipelines["tfidf_truncated_svd"], "MERCHANT_NAME"),
         n_jobs=config.N_JOBS,
         verbose=config.VERBOSE,
     ),
