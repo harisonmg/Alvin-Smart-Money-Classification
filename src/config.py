@@ -30,7 +30,7 @@ PROJECT_NAME = "alvin-smcc"
 RANDOM_SEED = 98765
 
 # cross validation
-NUM_FOLDS = decouple.config("NUM_FOLDS", cast=int, default=3)
+NUM_FOLDS = decouple.config("NUM_FOLDS", cast=int, default=2)
 
 CV_SPLITTER = model_selection.StratifiedKFold(
     n_splits=NUM_FOLDS, shuffle=True, random_state=RANDOM_SEED

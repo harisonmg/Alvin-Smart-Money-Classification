@@ -50,7 +50,7 @@ challenge
     ```
 
 ## Notes
-- By default, there are 3 folds for cross validation, but that can
+- By default, there are 2 folds for cross validation, but that can
     be changed with the `NUM_FOLDS` environment variable
 - Verbosity can be changed with the `VERBOSITY` environment variable
 - Environment variables can be set in the `.env` file
